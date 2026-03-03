@@ -1,47 +1,63 @@
-# ADR-001: Data Fetching Strategy (Resource API & RxJS Interop)
+# ADR-001: Data Fetching Strategy
 
-**Date:** 2026-01-29
-**Status:** Accepted
+## English
 
-## Context
+- Date: 2026-01-29
+- Status: Accepted
 
-In Angular 21, the framework introduced `resource` and `rxResource` as reactive primitives designed to integrate seamlessly with Signals and Zoneless Change Detection (`provideExperimentalZonelessChangeDetection`).
+### Context
 
-However, complex asynchronous scenarios, such as concurrent data fetching (parallel requests), are still best modeled using **RxJS** operators like `forkJoin`, `mergeMap`, and `retry`. We needed a strategy to leverage the power of RxJS for complex orchestration while maintaining a Signal-first API for our components to ensure Zoneless compatibility without manual subscription management (`async` pipe).
+The project needs a signal-friendly data-fetching model that works without Zone.js while still allowing RxJS operators for retries, mapping, and concurrency.
 
-## Decision
+### Decision
 
-We decided to adopt a hybrid **"RxJS for Logic, Promise for Bridge"** approach:
+The current implementation uses:
 
-1.  **Standard fetching**: Use `resource` with a `loader` that returns a `Promise`.
-2.  **Concurrency (Parallel Requests)**: Use RxJS `forkJoin` within the service method to orchestrate parallel HTTP calls.
-3.  **The Bridge**: Convert the final RxJS Observable stream into a `Promise` using `firstValueFrom`. This Promise is then consumed by the `resource` loader or `await`ed in the component, allowing the result to be reactive via the `resource.value()` signal.
+- `rxResource` for weather and transit data streams that depend on signals
+- `resource` for comparison flows that bridge promise-based orchestration into Angular reactivity
+- RxJS operators for retry logic, mapping, and concurrent requests
+- `firstValueFrom` when a promise boundary is useful for one-shot request orchestration
 
-### Example Pattern (`WeatherService.getComparison`)
+### Consequences
 
-```typescript
-// Service
-getComparison(cities: string[]): Promise<Model[]> {
-  const requests$ = cities.map(c => http.get(c)); // Array of Observables
-  return firstValueFrom(forkJoin(requests$)); // Converted to Promise
-}
+Pros:
 
-// Component
-dataResource = resource({
-  loader: async () => await service.getComparison(someSignal())
-});
-```
+- compatible with zoneless change detection
+- keeps components focused on reading reactive state
+- allows RxJS orchestration where it still adds value
 
-## Consequences
+Trade-offs:
 
-### Pros
+- mixed mental model: signals, resources, observables, and promises all exist in the codebase
+- some tests require extra care because resources and signals schedule work asynchronously
 
-- **Zoneless Compatibility**: `resource` manages the loading state, error state, and value resolution automatically using internal signals, perfect for Zoneless applications.
-- **Clean Components**: Components do not import RxJS operators or manage subscriptions (`unsubscribe`). They imply read `resource.value()`.
-- **Powerful Orchestration**: We retain access to RxJS's mature ecosystem (`retry`, `catchError`, `delay`, `forkJoin`) for the actual network logic.
-- **Race Condition Handling**: Angular's `resource` automatically handles race conditions (cancelling previous pending promises if request changes).
+## Español
 
-### Cons
+- Fecha: 2026-01-29
+- Estado: Aceptado
 
-- **Promise Conversion**: There is a slight conceptual overhead in converting Observable -> Promise, meaning we lose the "stream" capability (multiple emissions) for that specific call. This approach is suited for "One-Shot" data fetching (HTTP GET), not for continuous streams (WebSockets).
-- **Boilerplate**: Requires explicit `firstValueFrom` wrapper.
+### Contexto
+
+El proyecto necesita un modelo de data fetching compatible con Signals y sin Zone.js, pero que siga permitiendo usar operadores RxJS para reintentos, mapeo y concurrencia.
+
+### Decisión
+
+La implementación actual usa:
+
+- `rxResource` para flujos de clima y tránsito dependientes de signals
+- `resource` para comparaciones que conectan orquestación basada en promesas con la reactividad de Angular
+- operadores RxJS para reintentos, mapeo y peticiones concurrentes
+- `firstValueFrom` cuando conviene un límite tipo promesa para orquestación de peticiones one-shot
+
+### Consecuencias
+
+Pros:
+
+- compatible con detección de cambios zoneless
+- mantiene los componentes centrados en leer estado reactivo
+- permite usar orquestación RxJS donde todavía aporta valor
+
+Trade-offs:
+
+- existe un modelo mental mixto: signals, resources, observables y promesas
+- algunas pruebas requieren más cuidado porque resources y signals programan trabajo de forma asíncrona

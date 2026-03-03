@@ -1,169 +1,147 @@
-# 🚀 Guía Rápida: Desarrollo Local
+# Local Setup
 
-## ¿No tienes la API Key? ¡No hay problema!
+## English
 
-Sigue estos pasos para ejecutar el proyecto localmente:
+### Prerequisites
 
----
+- Node.js compatible with the repository toolchain
+- npm
+- An OpenWeatherMap API key
 
-## 📝 Paso 1: Obtener API Key GRATIS de OpenWeatherMap
+### Local Environment File
 
-1. **Crear cuenta**:
-   - Ve a: [https://openweathermap.org/api](https://openweathermap.org/api)
-   - Click en **Sign Up** (registro gratuito)
-   - Completa el formulario de registro
-   - Verifica tu email
-
-2. **Obtener tu API Key**:
-   - Inicia sesión en [https://home.openweathermap.org/api_keys](https://home.openweathermap.org/api_keys)
-   - Copia tu **"Default API Key"** (se genera automáticamente)
-   - Ejemplo: `a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`
-
-⏱️ **Nota**: La API key puede tardar ~10 minutos en activarse después del registro.
-
----
-
-## ⚙️ Paso 2: Configurar Environment Local
-
-1. **Crea el archivo de configuración local**:
-
-   ```bash
-   cd c:\D\Angular\github\eco-transit-explorer\src\environments
-   copy environment.local.example.ts environment.local.ts
-   ```
-
-2. **Edita `environment.local.ts`**:
-   - Abre el archivo recién creado
-   - Encuentra la línea: `apiKey: 'YOUR_API_KEY_HERE'`
-   - Reemplaza `'YOUR_API_KEY_HERE'` con tu API key real
-
-   **Ejemplo**:
-
-   ```typescript
-   export const environment: Environment = {
-     production: false,
-     openWeather: {
-       baseUrl: 'https://api.openweathermap.org/data/2.5',
-       apiKey: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6', // ← Tu API key aquí
-     },
-   };
-   ```
-
-3. **Guarda el archivo**
-
-✅ **¡Listo!** `environment.local.ts` está en `.gitignore` y NO se subirá a GitHub.
-
----
-
-## 🚀 Paso 3: Ejecutar el Proyecto
-
-### Opción 1: Modo Local (Recomendado)
+Create the local file from the example:
 
 ```bash
-npm run start:local
+cd src\environments
+copy environment.local.example.ts environment.local.ts
 ```
 
-**Usa**: `environment.local.ts` (con tu API key personal)
+Open `environment.local.ts` and replace `YOUR_API_KEY_HERE` with a valid API key.
 
-### Opción 2: Modo Development
+Important:
 
-```bash
-npm run start:dev
-```
+- `environment.local.ts` is ignored by Git
+- it must not be committed
+- CI does not use this file
 
-**Usa**: `environment.development.ts` (placeholder, NO funcionará sin modificar)
+### Start Commands
 
-### Opción 3: Comando estándar
+- `npm run start:local`
+  - uses `environment.local.ts`
+  - recommended for local development with a personal API key
 
-```bash
-npm start
-```
+- `npm run start:dev`
+  - uses `environment.development.ts`
+  - intended for committed development configuration and CI-oriented scenarios
 
-**Usa**: `environment.ts` (placeholder por defecto)
+- `npm start`
+  - uses the default serve target
+  - not recommended when the local API key is only present in `environment.local.ts`
 
----
+### Verification
 
-## 📋 Resumen de Comandos Disponibles
-
-| Comando               | Environment                  | Uso                       |
-| --------------------- | ---------------------------- | ------------------------- |
-| `npm start`           | `environment.ts`             | Por defecto (placeholder) |
-| `npm run start:local` | `environment.local.ts`       | **👈 Desarrollo local**   |
-| `npm run start:dev`   | `environment.development.ts` | Development (placeholder) |
-| `npm run start:prod`  | `environment.prod.ts`        | Producción (placeholder)  |
-| `npm run build:local` | `environment.local.ts`       | Build local               |
-| `npm run build:prod`  | `environment.prod.ts`        | Build producción          |
-
----
-
-## ✅ Verificar que Funciona
-
-1. **Ejecuta**:
+1. Run:
 
    ```bash
    npm run start:local
    ```
 
-2. **Abre el navegador**:
-   - Ve a: `http://localhost:4200/`
+2. Open `http://localhost:4200/`
+3. Search for a city such as `Madrid` or `London`
+4. Confirm that current weather and forecast data render correctly
 
-3. **Prueba la búsqueda**:
-   - Escribe una ciudad (ej: "Madrid")
-   - Espera 500ms (debounce)
-   - Deberías ver el clima actual y el forecast de 5 días
+### Troubleshooting
 
-4. **Revisa la consola**:
-   - **✅ SIN errores** = Todo funciona
-   - **❌ Error 401** = API key inválida o no activada aún (espera 10 min)
-   - **❌ Error 404** = Ciudad no encontrada (prueba con otra)
+#### `environment.local.ts` not found
 
----
-
-## 🔒 Seguridad
-
-- ✅ `environment.local.ts` **NO se sube** a GitHub (.gitignore)
-- ✅ Tu API key personal **permanece SEGURA** en tu máquina
-- ✅ Para CI/CD, usamos GitHub Secrets (configuración separada)
-
----
-
-## ❓ Troubleshooting
-
-### Error: "Cannot find module 'environment.local.ts'"
-
-**Solución**: Creaste el archivo correctamente?
+Create it again from the example:
 
 ```bash
-# Verifica que existe:
-dir src\environments\environment.local.ts
-
-# Si no existe, créalo desde el ejemplo:
 copy src\environments\environment.local.example.ts src\environments\environment.local.ts
 ```
 
-### Error 401: "Invalid API key"
+#### Invalid API key or `401`
 
-**Posibles causas**:
+- verify the copied key
+- wait a few minutes after creating a new OpenWeatherMap account
+- confirm that `npm run start:local` is being used instead of `npm start`
 
-1. La API key no está activada aún (espera 10 minutos después de registro)
-2. Copiaste mal la key (verifica espacios extra)
-3. Usaste comillas incorrectas en el archivo
+#### App loads but weather data does not appear
 
-**Solución**: Revisa tu API key en [https://home.openweathermap.org/api_keys](https://home.openweathermap.org/api_keys)
+- verify the key in `environment.local.ts`
+- verify network requests in the browser devtools
+- confirm that the searched city exists
 
-### La app carga pero no muestra clima
+## Español
 
-**Causa**: Estás usando `npm start` en lugar de `npm run start:local`
+### Prerrequisitos
 
-**Solución**:
+- Node.js compatible con el toolchain del repositorio
+- npm
+- Una API key de OpenWeatherMap
+
+### Archivo de Entorno Local
+
+Crear el archivo local a partir del ejemplo:
 
 ```bash
-# Detén el servidor (Ctrl+C)
-npm run start:local
+cd src\environments
+copy environment.local.example.ts environment.local.ts
 ```
 
----
+Abrir `environment.local.ts` y reemplazar `YOUR_API_KEY_HERE` por una API key válida.
 
-## 🎉 ¡Todo listo!
+Importante:
 
-Ahora puedes desarrollar localmente con tu propia API key sin preocuparte por la seguridad.
+- `environment.local.ts` está ignorado por Git
+- no debe versionarse
+- CI no usa este archivo
+
+### Comandos de Inicio
+
+- `npm run start:local`
+  - usa `environment.local.ts`
+  - recomendado para desarrollo local con API key personal
+
+- `npm run start:dev`
+  - usa `environment.development.ts`
+  - pensado para configuración de desarrollo versionada y escenarios orientados a CI
+
+- `npm start`
+  - usa el target por defecto de Angular
+  - no es recomendable si la API key local solo existe en `environment.local.ts`
+
+### Verificación
+
+1. Ejecutar:
+
+   ```bash
+   npm run start:local
+   ```
+
+2. Abrir `http://localhost:4200/`
+3. Buscar una ciudad como `Madrid` o `London`
+4. Confirmar que se renderizan el clima actual y el pronóstico
+
+### Solución de Problemas
+
+#### No existe `environment.local.ts`
+
+Crearlo nuevamente desde el ejemplo:
+
+```bash
+copy src\environments\environment.local.example.ts src\environments\environment.local.ts
+```
+
+#### API key inválida o error `401`
+
+- verificar la clave copiada
+- esperar unos minutos tras crear una cuenta nueva en OpenWeatherMap
+- confirmar que se está usando `npm run start:local` y no `npm start`
+
+#### La app carga pero no aparecen datos del clima
+
+- verificar la clave en `environment.local.ts`
+- revisar las peticiones de red en devtools
+- confirmar que la ciudad buscada existe

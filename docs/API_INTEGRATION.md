@@ -1,42 +1,81 @@
 # API Integration
 
-## Overview
+## English
 
-This project integrates with OpenWeatherMap using Angular's Resource API and RxJS Interceptors.
+### Overview
 
-## Setup
+The project integrates with OpenWeatherMap through an Angular service layer built on top of `HttpClient`, dependency-injection tokens, `rxResource`, and domain-level error mapping.
 
-### API Key
+### Configuration Model
 
-1. Get an API key from [OpenWeatherMap](https://openweathermap.org/api).
-2. Open `src/environments/environment.ts` (for local dev, usually) or `src/environments/environment.development.ts`.
-3. Replace `__REPLACE_ME__` with your actual API key.
-   ```typescript
-   apiKey: 'your_actual_key_here';
-   ```
-4. **DO NOT COMMIT** your real API key.
+- `src/environments/environment.ts`: tracked base environment with the `__OPENWEATHER_API_KEY__` placeholder
+- `src/environments/environment.development.ts`: tracked development placeholder
+- `src/environments/environment.prod.ts`: tracked production placeholder, replaced in CI
+- `src/environments/environment.local.ts`: local-only file, ignored by Git
 
-## Architecture
+### Tokens and Client
 
-- **Resource API**: `WeatherService` uses Angular experimental `resource` API for data fetching.
-- **Signals**: UI is fully powered by Signals (`input`, `computed`).
-- **Interceptors**: Global `httpErrorInterceptor` normalizes errors into `DomainError` classes.
-- **Cache**: In-memory TTL cache (60s) implemented in `WeatherService`.
+- `OPENWEATHER_BASE_URL` and `OPENWEATHER_API_KEY` are defined in `src/app/core/api/api.tokens.ts`
+- `OpenWeatherClient` is implemented in `src/app/core/api/openweather.client.ts`
+- Tokens are wired in `src/app/app.config.ts`
+
+### Endpoints Used
+
+- `GET /weather`
+  - Query params: `q`, `appid`, `units=metric`
+- `GET /forecast`
+  - Query params: `q`, `appid`, `units=metric`
 
 ### Error Handling
 
-- **Rate Limit (429)**: Automatically retries with backoff based on `Retry-After` header.
-- **Network Error**: Retries with exponential backoff.
-- **UI**: Displays specific error messages (e.g., "Too many requests", "Network unavailable").
+- `httpErrorInterceptor` maps HTTP errors to domain errors
+- `rateLimitInterceptor` shows a PrimeNG toast for `429` and `503`
+- `safeRetry()` retries:
+  - rate-limited requests using `Retry-After`
+  - network failures using exponential backoff
 
-### Tokens & Clients
+### Notes
 
-- `OPENWEATHER_BASE_URL` & `OPENWEATHER_API_KEY`: Defined in `src/app/core/api/api.tokens.ts`.
-- `OpenWeatherClient`: Low-level HTTP client in `src/app/core/api/openweather.client.ts`.
+- No real API key should be stored in tracked source files.
+- CI injects `OPENWEATHER_API_KEY` during the production build.
+- Local development should use `environment.local.ts`.
 
-## Endpoints
+## Español
 
-- **Current Weather**: `/weather` (GET)
-  - Query Params: `q={city}`, `appid={key}`, `units=metric`
-- **5-Day Forecast**: `/forecast` (GET)
-  - Query Params: `q={city}`, `appid={key}`, `units=metric`
+### Resumen
+
+El proyecto integra OpenWeatherMap mediante una capa de servicios Angular construida sobre `HttpClient`, tokens de inyección, `rxResource` y mapeo de errores a nivel de dominio.
+
+### Modelo de Configuración
+
+- `src/environments/environment.ts`: entorno base versionado con el placeholder `__OPENWEATHER_API_KEY__`
+- `src/environments/environment.development.ts`: placeholder versionado para desarrollo
+- `src/environments/environment.prod.ts`: placeholder versionado para producción, reemplazado en CI
+- `src/environments/environment.local.ts`: archivo solo local, ignorado por Git
+
+### Tokens y Cliente
+
+- `OPENWEATHER_BASE_URL` y `OPENWEATHER_API_KEY` están definidos en `src/app/core/api/api.tokens.ts`
+- `OpenWeatherClient` está implementado en `src/app/core/api/openweather.client.ts`
+- Los tokens se registran en `src/app/app.config.ts`
+
+### Endpoints Utilizados
+
+- `GET /weather`
+  - Parámetros: `q`, `appid`, `units=metric`
+- `GET /forecast`
+  - Parámetros: `q`, `appid`, `units=metric`
+
+### Manejo de Errores
+
+- `httpErrorInterceptor` transforma errores HTTP en errores de dominio
+- `rateLimitInterceptor` muestra un toast de PrimeNG para `429` y `503`
+- `safeRetry()` reintenta:
+  - peticiones limitadas por cuota usando `Retry-After`
+  - fallos de red con backoff exponencial
+
+### Notas
+
+- No debe guardarse ninguna API key real en archivos versionados.
+- CI inyecta `OPENWEATHER_API_KEY` durante el build de producción.
+- El desarrollo local debe usar `environment.local.ts`.

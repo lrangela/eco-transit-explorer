@@ -1,67 +1,97 @@
-# Configuración de Scripts y Environments
+# Scripts and Environment Configuration
 
-Se agregaron comandos npm para facilitar el desarrollo local y trabajar con diferentes configuraciones.
+## English
 
-## Comandos Nuevos en package.json
+### npm Scripts
 
-### Desarrollo (Serve):
+#### Serve
 
-- `npm start` - Por defecto (usa environment.ts con placeholder)
-- `npm run start:local` - **👈 USAR ESTE** para desarrollo local con tu API key
-- `npm run start:dev` - Development (placeholder)
-- `npm run start:prod` - Producción (placeholder)
+- `npm start`: default Angular serve target
+- `npm run start:local`: serve using `environment.local.ts`
+- `npm run start:dev`: serve using `environment.development.ts`
+- `npm run start:prod`: serve using the production target
 
-### Build:
+#### Build
 
-- `npm run build` - Build por defecto
-- `npm run build:local` - Build con environment.local.ts
-- `npm run build:dev` - Build development
-- `npm run build:prod` - Build producción
+- `npm run build`: production build
+- `npm run build:local`: local build using `environment.local.ts`
+- `npm run build:dev`: development build
+- `npm run build:prod`: production build
 
-## Nueva Configuración en angular.json
+#### Tests
 
-Se agregó la configuración `"local"` en las `configurations`:
+- `npm run test`: unit tests via `@angular/build:unit-test`
+- `npm run e2e`: Playwright E2E suite
+- `npm run e2e:ui`: Playwright UI mode
+- `npm run e2e:headed`: headed Playwright execution
+
+### angular.json Configurations
+
+The application defines:
+
+- `development`
+- `production`
+- `local`
+
+The `local` configuration replaces:
 
 ```json
-"local": {
-  "optimization": false,
-  "extractLicenses": false,
-  "sourceMap": true,
-  "fileReplacements": [
-    {
-      "replace": "src/environments/environment.ts",
-      "with": "src/environments/environment.local.ts"
-    }
-  ]
+{
+  "replace": "src/environments/environment.ts",
+  "with": "src/environments/environment.local.ts"
 }
 ```
 
-**Efecto**: Cuando ejecutas `npm run start:local`, Angular usa `environment.local.ts` en lugar del environment.ts base.
+### Notes
 
-## Archivos Creados
+- `npm run start:local` is the intended local workflow when using a personal API key
+- `npm run start:dev` is the committed development path and is used by CI-related tooling where a tracked environment is required
+- `npm run test` currently runs with `jsdom` available in dev dependencies
 
-1. **environment.local.example.ts** - Template con instrucciones
-2. **environment.local.ts** - Archivo real para desarrollo local (en .gitignore)
-3. **docs/LOCAL_SETUP.md** - Guía completa de configuración
+## Español
 
-## Cómo Usar
+### Scripts npm
 
-1. **Primera vez**:
+#### Serve
 
-   ```bash
-   copy src\environments\environment.local.example.ts src\environments\environment.local.ts
-   ```
+- `npm start`: target por defecto de Angular
+- `npm run start:local`: serve usando `environment.local.ts`
+- `npm run start:dev`: serve usando `environment.development.ts`
+- `npm run start:prod`: serve usando el target de producción
 
-2. **Editar environment.local.ts**:
-   - Reemplaza `'YOUR_API_KEY_HERE'` con tu API key real de OpenWeatherMap
+#### Build
 
-3. **Ejecutar**:
-   ```bash
-   npm run start:local
-   ```
+- `npm run build`: build de producción
+- `npm run build:local`: build local usando `environment.local.ts`
+- `npm run build:dev`: build de desarrollo
+- `npm run build:prod`: build de producción
 
-## Seguridad
+#### Pruebas
 
-✅ `environment.local.ts` está en `.gitignore`
-✅ Tu API key personal **NUNCA** se sube a GitHub
-✅ Solo usas placeholders en los archivos versionados
+- `npm run test`: pruebas unitarias vía `@angular/build:unit-test`
+- `npm run e2e`: suite E2E con Playwright
+- `npm run e2e:ui`: modo UI de Playwright
+- `npm run e2e:headed`: ejecución visible de Playwright
+
+### Configuraciones de angular.json
+
+La aplicación define:
+
+- `development`
+- `production`
+- `local`
+
+La configuración `local` reemplaza:
+
+```json
+{
+  "replace": "src/environments/environment.ts",
+  "with": "src/environments/environment.local.ts"
+}
+```
+
+### Notas
+
+- `npm run start:local` es el flujo recomendado para desarrollo local con API key personal
+- `npm run start:dev` es la ruta de desarrollo versionada y se usa en herramientas asociadas a CI cuando hace falta un entorno trackeado
+- `npm run test` ejecuta las pruebas unitarias con `jsdom` disponible en dev dependencies
