@@ -4,7 +4,7 @@ import { OpenWeatherClient } from '../../../core/api/openweather.client';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { of } from 'rxjs';
 import { CurrentWeatherResponse } from '../../../core/api/openweather.types';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('WeatherService', () => {
   let service: WeatherService;
@@ -83,23 +83,17 @@ describe('WeatherService', () => {
     });
   });
   describe('search debounce', () => {
-    beforeEach(() => {
-      vi.useFakeTimers();
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
     it('should debounce search input by 500ms', async () => {
+      service.weatherResource.value();
+
       // 1. Initial State
       service.search('M');
-      vi.advanceTimersByTime(200); // 200ms passed
+      await new Promise(resolve => setTimeout(resolve, 200));
       expect(clientSpy.getCurrentByCityName).not.toHaveBeenCalled();
 
       // 2. Type "Ma" (resets timer)
       service.search('Ma');
-      vi.advanceTimersByTime(400); // 400ms passed since "Ma" (total 600)
+      await new Promise(resolve => setTimeout(resolve, 400));
       expect(clientSpy.getCurrentByCityName).not.toHaveBeenCalled();
 
       // 3. Type "Mad" (resets timer)
@@ -113,16 +107,9 @@ describe('WeatherService', () => {
       } as any));
 
       service.search('Mad');
-      vi.advanceTimersByTime(500); // 500ms passed since "Mad" -> Should Refire
-
-      // Force change detection / effect execution if needed?
-      // In a zoneless/signal world, effects usually run asynchronously or when flushed.
-      // rxResource uses an effect. Effects in TestBed might need manual flush or just wait.
-      // But vi.advanceTimersByTime handles JS timers.
-
-      // We might need to ensure the effect *scheduler* runs.
-      // Angular Signals use microtasks.
-      // We can try awaiting a microtask or just checking.
+      await new Promise(resolve => setTimeout(resolve, 550));
+      TestBed.flushEffects();
+      await Promise.resolve();
 
       expect(clientSpy.getCurrentByCityName).toHaveBeenCalledWith('Mad');
       expect(clientSpy.getCurrentByCityName).toHaveBeenCalledTimes(1);
