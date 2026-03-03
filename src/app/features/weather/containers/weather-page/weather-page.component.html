@@ -1,0 +1,18 @@
+<main class="weather-container" [class]="weatherBackgroundClass()">
+    <h1 class="text-center mb-5 text-3xl font-bold text-white" style="text-shadow: 0 2px 10px rgba(0,0,0,0.2)">
+        EcoTransit Explorer</h1>
+
+    <app-weather-widget [weather]="service.weatherResource.value() ?? undefined"
+        [isLoading]="service.weatherResource.isLoading()" [error]="service.lastError() ?? service.weatherResource.error()"
+        (search)="service.search($event)" (retry)="service.retry()">
+    </app-weather-widget>
+
+    @if (service.forecastResource.value()) {
+    <div class="mt-4">
+        <app-forecast-widget [forecasts]="service.forecastResource.value() ?? undefined">
+        </app-forecast-widget>
+    </div>
+    }
+
+
+</main>
