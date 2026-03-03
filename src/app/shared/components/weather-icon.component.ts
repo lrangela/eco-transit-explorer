@@ -55,9 +55,9 @@ export class WeatherIconComponent {
   iconPath = computed(() => {
     const code = this.code();
     if (VALID_CODES.has(code)) {
-      return `/assets/icons/weather/${code}.svg`;
+      return `assets/icons/weather/${code}.svg`;
     }
-    return '/assets/icons/weather/fallback.svg';
+    return 'assets/icons/weather/fallback.svg';
   });
 
   ariaLabel = computed(() => {
