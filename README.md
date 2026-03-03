@@ -1,13 +1,12 @@
 # 🌍 EcoTransit Explorer (Angular 21 Reference Architecture)
 
-![CI](https://github.com/TU-USUARIO/eco-transit-explorer/actions/workflows/ci-cd.yml/badge.svg)
+![CI](https://github.com/lrangela/eco-transit-explorer/actions/workflows/ci-cd.yml/badge.svg)
 
 A "Bleeding Edge" portfolio project demonstrating the use of **Angular 21 Zoneless**, **Signals**, **Resource API**, and **PrimeNG** in a real-world weather and transport dashboard application.
 
 ## 🌐 Demo en Vivo
 
-**URL:** [https://TU-USUARIO.github.io/eco-transit-explorer/](https://TU-USUARIO.github.io/eco-transit-explorer/)  
-_(Reemplaza `TU-USUARIO` con tu username de GitHub una vez que hagas el primer deployment)_
+**URL:** [https://lrangela.github.io/eco-transit-explorer/](https://lrangela.github.io/eco-transit-explorer/)
 
 ---
 
@@ -179,7 +178,7 @@ Después del primer push con el workflow:
 1. Ve a **Settings** → **Pages**
 2. En **Source**, selecciona: **GitHub Actions**
 3. Guarda los cambios
-4. Espera unos minutos y accede a: `https://TU-USUARIO.github.io/eco-transit-explorer/`
+4. Espera unos minutos y accede a: `https://lrangela.github.io/eco-transit-explorer/`
 
 ---
 

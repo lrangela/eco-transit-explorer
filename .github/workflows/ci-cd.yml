@@ -1,4 +1,4 @@
-name: 🚀 CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
@@ -18,48 +18,48 @@ concurrency:
 
 jobs:
   test-unit:
-    name: 🧪 Unit Tests
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js 20
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
 
-      - name: 📚 Install Dependencies
+      - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: 🧪 Run Unit Tests
-        run: npm run test -- --watch=false --browsers=ChromeHeadless
+      - name: Run Unit Tests
+        run: npm run test -- --watch=false
 
   test-e2e:
-    name: 🎭 E2E Tests
+    name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: 📥 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js 20
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
 
-      - name: 📚 Install Dependencies
+      - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: 🎭 Install Playwright Browsers
+      - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: 🎬 Run E2E Tests
+      - name: Run E2E Tests
         run: npm run e2e
 
-      - name: 📤 Upload Playwright Report
+      - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -68,41 +68,41 @@ jobs:
           retention-days: 7
 
   build:
-    name: 📦 Build Production
+    name: Build Production
     runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js 20
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
 
-      - name: 📚 Install Dependencies
+      - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: 🔑 Inject API Key
+      - name: Inject API Key
         run: |
           echo "Injecting API Key..."
           sed -i "s|__OPENWEATHER_API_KEY__|${{ secrets.OPENWEATHER_API_KEY }}|g" src/environments/environment.prod.ts
           sed -i "s|__OPENWEATHER_API_KEY__|${{ secrets.OPENWEATHER_API_KEY }}|g" src/environments/environment.ts
         shell: bash
 
-      - name: 🔨 Build Angular App
+      - name: Build Angular App
         run: npm run build -- --base-href=/eco-transit-explorer/
 
-      - name: 📄 Create 404.html (SPA)
+      - name: Create 404.html (SPA)
         run: cp dist/eco-transit-explorer/browser/index.html dist/eco-transit-explorer/browser/404.html
 
-      - name: 📤 Upload Pages Artifact
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/eco-transit-explorer/browser
 
   deploy:
-    name: 🚀 Deploy to GitHub Pages
+    name: Deploy to GitHub Pages
     needs: [test-unit, test-e2e, build]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -110,6 +110,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: 🚀 Deploy
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
