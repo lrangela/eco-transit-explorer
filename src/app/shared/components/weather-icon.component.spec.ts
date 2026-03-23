@@ -21,8 +21,6 @@ describe('WeatherIconComponent', () => {
     it('should render an image with correct assets path', () => {
         fixture.componentRef.setInput('code', '01d');
         fixture.detectChanges();
-        console.log('DEBUG HTML:', fixture.nativeElement.innerHTML);
-
         const img: HTMLImageElement = fixture.nativeElement.querySelector('img');
         expect(img).toBeTruthy();
         // NgOptimizedImage transforms src, so we check if it contains the assets path

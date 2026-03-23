@@ -2,80 +2,208 @@
 
 ## English
 
-### Overview
+### Real Problem
 
-The project integrates with OpenWeatherMap through an Angular service layer built on top of `HttpClient`, dependency-injection tokens, `rxResource`, and domain-level error mapping.
+The application must consume weather and bike-sharing data while remaining deployable on GitHub Pages, which means there is no application backend available at runtime.
 
-### Configuration Model
+### Solution
 
-- `src/environments/environment.ts`: tracked base environment with the `__OPENWEATHER_API_KEY__` placeholder
-- `src/environments/environment.development.ts`: tracked development placeholder
-- `src/environments/environment.prod.ts`: tracked production placeholder, replaced in CI
-- `src/environments/environment.local.ts`: local-only file, ignored by Git
+The Angular client integrates directly with OpenWeather and CityBikes. Configuration is resolved at startup from a tracked runtime template plus an optional local override for developer machines.
 
-### Tokens and Client
+### Architecture
 
-- `OPENWEATHER_BASE_URL` and `OPENWEATHER_API_KEY` are defined in `src/app/core/api/api.tokens.ts`
-- `OpenWeatherClient` is implemented in `src/app/core/api/openweather.client.ts`
-- Tokens are wired in `src/app/app.config.ts`
+```mermaid
+flowchart TB
+  App["Angular SPA"]
+  Runtime["runtime-config.json"]
+  Local["environment.local.ts"]
+  WeatherClient["OpenWeatherClient"]
+  TransitService["TransitService"]
+  WeatherAPI["OpenWeather /weather + /forecast"]
+  BikesAPI["CityBikes /networks/bicimad"]
 
-### Endpoints Used
+  Runtime --> App
+  Local --> App
+  App --> WeatherClient
+  App --> TransitService
+  WeatherClient --> WeatherAPI
+  TransitService --> BikesAPI
+```
 
-- `GET /weather`
-  - Query params: `q`, `appid`, `units=metric`
-- `GET /forecast`
-  - Query params: `q`, `appid`, `units=metric`
+### Stack
 
-### Error Handling
+- `HttpClient`
+- Angular signals
+- `rxResource` for weather and transit streams
+- `resource` for comparison orchestration
+- runtime configuration service
+- domain-level error mapping
 
-- `httpErrorInterceptor` maps HTTP errors to domain errors
-- `rateLimitInterceptor` shows a PrimeNG toast for `429` and `503`
-- `safeRetry()` retries:
-  - rate-limited requests using `Retry-After`
-  - network failures using exponential backoff
+### Technical Decisions
 
-### Notes
+- `OpenWeatherClient` calls OpenWeather directly with `q`, `appid`, `units`, and `lang`.
+- `TransitService` calls CityBikes directly and is intentionally scoped to bike availability.
+- Runtime flags control feature availability without rebuild.
+- Global HTTP toasts are suppressed for per-city comparison failures to avoid toast spam.
+- Comparison is limited to 3 cities because the free weather tier is constrained.
 
-- No real API key should be stored in tracked source files.
-- CI injects `OPENWEATHER_API_KEY` during the production build.
-- Local development should use `environment.local.ts`.
+### Endpoints
+
+- `GET {weatherBaseUrl}/weather`
+- `GET {weatherBaseUrl}/forecast`
+- `GET {transitBaseUrl}/networks/bicimad`
+
+### Runtime Configuration Contract
+
+```json
+{
+  "api": {
+    "weatherBaseUrl": "https://api.openweathermap.org/data/2.5",
+    "weatherApiKey": "__OPENWEATHER_API_KEY__",
+    "weatherUnits": "metric",
+    "weatherLanguage": "en",
+    "transitBaseUrl": "https://api.citybik.es/v2"
+  },
+  "features": {
+    "comparison": true,
+    "transit": true
+  },
+  "observability": {
+    "consoleLogging": false
+  }
+}
+```
+
+### How to Run
+
+- Local frontend-only:
+
+  ```bash
+  npm run start:local
+  ```
+
+- CI-like development mode:
+
+  ```bash
+  npm run start:dev
+  ```
+
+### How to Deploy
+
+- CI writes `public/runtime-config.json` with `node scripts/write-runtime-config.mjs`
+- GitHub Actions injects:
+  - `OPENWEATHER_API_KEY`
+  - optional base URL, units, and language values
+- Static assets are published to GitHub Pages
+
+### Highlighted Features
+
+- direct runtime-configured weather integration
+- local-only secret override
+- direct bike network availability feed
+- feature flags with `canMatch`
+- retry-aware client error handling
 
 ## Español
 
-### Resumen
+### Problema real
 
-El proyecto integra OpenWeatherMap mediante una capa de servicios Angular construida sobre `HttpClient`, tokens de inyección, `rxResource` y mapeo de errores a nivel de dominio.
+La aplicación debe consumir datos de clima y bike-sharing manteniéndose desplegable en GitHub Pages, lo que implica que no existe un backend de aplicación en runtime.
 
-### Modelo de Configuración
+### Solución
 
-- `src/environments/environment.ts`: entorno base versionado con el placeholder `__OPENWEATHER_API_KEY__`
-- `src/environments/environment.development.ts`: placeholder versionado para desarrollo
-- `src/environments/environment.prod.ts`: placeholder versionado para producción, reemplazado en CI
-- `src/environments/environment.local.ts`: archivo solo local, ignorado por Git
+El cliente Angular se integra directamente con OpenWeather y CityBikes. La configuración se resuelve al inicio usando una plantilla runtime versionada y un override local opcional para la máquina del desarrollador.
 
-### Tokens y Cliente
+### Arquitectura
 
-- `OPENWEATHER_BASE_URL` y `OPENWEATHER_API_KEY` están definidos en `src/app/core/api/api.tokens.ts`
-- `OpenWeatherClient` está implementado en `src/app/core/api/openweather.client.ts`
-- Los tokens se registran en `src/app/app.config.ts`
+```mermaid
+flowchart TB
+  App["SPA Angular"]
+  Runtime["runtime-config.json"]
+  Local["environment.local.ts"]
+  WeatherClient["OpenWeatherClient"]
+  TransitService["TransitService"]
+  WeatherAPI["OpenWeather /weather + /forecast"]
+  BikesAPI["CityBikes /networks/bicimad"]
 
-### Endpoints Utilizados
+  Runtime --> App
+  Local --> App
+  App --> WeatherClient
+  App --> TransitService
+  WeatherClient --> WeatherAPI
+  TransitService --> BikesAPI
+```
 
-- `GET /weather`
-  - Parámetros: `q`, `appid`, `units=metric`
-- `GET /forecast`
-  - Parámetros: `q`, `appid`, `units=metric`
+### Stack
 
-### Manejo de Errores
+- `HttpClient`
+- signals de Angular
+- `rxResource` para flujos de clima y transit
+- `resource` para la orquestación de comparison
+- servicio de configuración runtime
+- mapeo de errores a nivel de dominio
 
-- `httpErrorInterceptor` transforma errores HTTP en errores de dominio
-- `rateLimitInterceptor` muestra un toast de PrimeNG para `429` y `503`
-- `safeRetry()` reintenta:
-  - peticiones limitadas por cuota usando `Retry-After`
-  - fallos de red con backoff exponencial
+### Decisiones técnicas
 
-### Notas
+- `OpenWeatherClient` llama directamente a OpenWeather con `q`, `appid`, `units` y `lang`.
+- `TransitService` llama directamente a CityBikes y queda acotado intencionalmente a disponibilidad de bicicletas.
+- Las feature flags runtime controlan módulos sin recompilar.
+- Los toasts globales se suprimen en fallos parciales de comparison para evitar ruido.
+- Comparison se limita a 3 ciudades por las restricciones del plan gratuito.
 
-- No debe guardarse ninguna API key real en archivos versionados.
-- CI inyecta `OPENWEATHER_API_KEY` durante el build de producción.
-- El desarrollo local debe usar `environment.local.ts`.
+### Endpoints
+
+- `GET {weatherBaseUrl}/weather`
+- `GET {weatherBaseUrl}/forecast`
+- `GET {transitBaseUrl}/networks/bicimad`
+
+### Contrato de configuración runtime
+
+```json
+{
+  "api": {
+    "weatherBaseUrl": "https://api.openweathermap.org/data/2.5",
+    "weatherApiKey": "__OPENWEATHER_API_KEY__",
+    "weatherUnits": "metric",
+    "weatherLanguage": "en",
+    "transitBaseUrl": "https://api.citybik.es/v2"
+  },
+  "features": {
+    "comparison": true,
+    "transit": true
+  },
+  "observability": {
+    "consoleLogging": false
+  }
+}
+```
+
+### Cómo correr
+
+- Modo local frontend-only:
+
+  ```bash
+  npm run start:local
+  ```
+
+- Modo desarrollo similar a CI:
+
+  ```bash
+  npm run start:dev
+  ```
+
+### Cómo desplegar
+
+- CI genera `public/runtime-config.json` con `node scripts/write-runtime-config.mjs`
+- GitHub Actions inyecta:
+  - `OPENWEATHER_API_KEY`
+  - valores opcionales para base URL, unidades e idioma
+- Los assets estáticos se publican en GitHub Pages
+
+### Features destacadas
+
+- integración directa de clima configurada en runtime
+- override local con secreto no versionado
+- feed directo de disponibilidad de bike-sharing
+- feature flags con `canMatch`
+- manejo de errores con reintentos controlados

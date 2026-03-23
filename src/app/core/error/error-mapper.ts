@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+    AppError,
     DomainError,
     NetworkError,
     NotFoundError,
@@ -9,6 +10,10 @@ import {
 } from './domain-errors';
 
 export function mapHttpError(err: unknown): DomainError {
+    if (err instanceof AppError) {
+        return err;
+    }
+
     if (err instanceof HttpErrorResponse) {
         switch (err.status) {
             case 401:

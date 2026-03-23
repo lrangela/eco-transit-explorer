@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { featureFlagGuard } from './core/guards/feature-flag.guard';
 
 export const routes: Routes = [
     {
@@ -7,10 +8,12 @@ export const routes: Routes = [
     },
     {
         path: 'compare',
+        canMatch: [featureFlagGuard('comparison')],
         loadComponent: () => import('./features/weather/containers/weather-comparison/weather-comparison.component').then(m => m.WeatherComparisonComponent)
     },
     {
         path: 'transit',
+        canMatch: [featureFlagGuard('transit')],
         loadComponent: () => import('./features/transit/components/transit-dashboard/transit-dashboard.component').then(m => m.TransitDashboardComponent)
     },
     {

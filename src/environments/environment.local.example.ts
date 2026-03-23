@@ -1,24 +1,18 @@
+import { Environment } from './environment.model';
+
 /**
- * Example file for local development only.
+ * Local-only Angular environment.
  *
- * Copy this file to `environment.local.ts` and replace `YOUR_API_KEY_HERE`
- * with a valid OpenWeatherMap API key.
- *
- * `environment.local.ts` is ignored by Git and must not be committed.
+ * Use this file for local frontend-only overrides that must stay out of Git.
  */
-
-export interface Environment {
-    production: boolean;
-    openWeather: {
-        baseUrl: string;
-        apiKey: string;
-    };
-}
-
 export const environment: Environment = {
     production: false,
-    openWeather: {
-        baseUrl: 'https://api.openweathermap.org/data/2.5',
-        apiKey: 'YOUR_API_KEY_HERE'
+    runtimeConfigOverride: {
+        api: {
+            weatherApiKey: 'replace-with-your-openweather-api-key',
+            weatherBaseUrl: 'https://api.openweathermap.org/data/2.5',
+            weatherUnits: 'metric',
+            weatherLanguage: 'en'
+        }
     }
 };

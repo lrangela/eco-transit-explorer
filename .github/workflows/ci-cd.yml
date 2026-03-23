@@ -17,6 +17,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  validate-config:
+    name: Runtime Config Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Verify Runtime Config Contract
+        run: npm run verify:runtime-config
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Smoke Tests
+        run: npm run test:smoke
+
   test-unit:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -83,12 +108,13 @@ jobs:
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Inject API Key
-        run: |
-          echo "Injecting API Key..."
-          sed -i "s|__OPENWEATHER_API_KEY__|${{ secrets.OPENWEATHER_API_KEY }}|g" src/environments/environment.prod.ts
-          sed -i "s|__OPENWEATHER_API_KEY__|${{ secrets.OPENWEATHER_API_KEY }}|g" src/environments/environment.ts
-        shell: bash
+      - name: Write Runtime Config
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          OPENWEATHER_BASE_URL: ${{ vars.OPENWEATHER_BASE_URL }}
+          OPENWEATHER_UNITS: ${{ vars.OPENWEATHER_UNITS }}
+          OPENWEATHER_LANGUAGE: ${{ vars.OPENWEATHER_LANGUAGE }}
+        run: node scripts/write-runtime-config.mjs
 
       - name: Build Angular App
         run: npm run build -- --base-href=/eco-transit-explorer/
@@ -103,7 +129,7 @@ jobs:
 
   deploy:
     name: Deploy to GitHub Pages
-    needs: [test-unit, test-e2e, build]
+    needs: [validate-config, test-unit, test-e2e, build]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:

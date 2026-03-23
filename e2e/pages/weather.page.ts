@@ -32,7 +32,7 @@ export class WeatherPage extends BasePage {
 
     async searchCity(cityName: string) {
         await this.searchInput.fill(cityName);
-        await this.searchInput.press('Enter');
+        await this.searchButton.click();
 
         // Esperar a que aparezca el skeleton (loading state) y luego desaparezca
         // Usamos catch porque si la respuesta es muy rápida el loading state podría no verse

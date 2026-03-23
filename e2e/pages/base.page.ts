@@ -24,6 +24,34 @@ export class BasePage {
         await this.page.screenshot({ path: `screenshots/${name}.png` });
     }
 
+    async mockRuntimeConfig(overrides?: Record<string, unknown>) {
+        await this.page.route('**/runtime-config.json', async (route) => {
+            const config = {
+                api: {
+                    weatherBaseUrl: 'https://api.openweathermap.org/data/2.5',
+                    weatherApiKey: 'test-key',
+                    weatherUnits: 'metric',
+                    weatherLanguage: 'en',
+                    transitBaseUrl: 'https://api.citybik.es/v2',
+                },
+                features: {
+                    comparison: true,
+                    transit: true,
+                },
+                observability: {
+                    consoleLogging: false,
+                },
+                ...overrides,
+            };
+
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(config),
+            });
+        });
+    }
+
     /**
      * Intercepta llamadas a OpenWeatherMap API
      * @param mockData - Respuesta mock a devolver
@@ -54,6 +82,16 @@ export class BasePage {
                 status: statusCode,
                 contentType: 'application/json',
                 body: JSON.stringify({ cod: '404', message: 'city not found' })
+            });
+        });
+    }
+
+    async mockTransitAPI(mockData: any, statusCode: number = 200) {
+        await this.page.route('**/networks/bicimad', async (route) => {
+            await route.fulfill({
+                status: statusCode,
+                contentType: 'application/json',
+                body: JSON.stringify(mockData),
             });
         });
     }

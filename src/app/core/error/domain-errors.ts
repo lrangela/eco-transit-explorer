@@ -12,7 +12,7 @@ export class AppError implements DomainError {
 
 export class UnauthorizedError extends AppError {
     override name = 'UnauthorizedError';
-    constructor(message = 'Unauthorized access. Please check your API key.') {
+    constructor(message = 'Unauthorized access. The upstream service rejected the request.') {
         super(message, 401);
     }
 }

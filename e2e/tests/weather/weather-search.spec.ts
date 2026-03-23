@@ -7,6 +7,7 @@ test.describe('Weather Dashboard - Search Functionality', () => {
 
     test.beforeEach(async ({ page }) => {
         weatherPage = new WeatherPage(page);
+        await weatherPage.mockRuntimeConfig();
         // Habilitar API mocking por defecto
         await weatherPage.mockWeatherAPI(MOCK_WEATHER_RESPONSE.london);
         await weatherPage.mockForecastAPI(MOCK_FORECAST_RESPONSE.london);
@@ -39,6 +40,7 @@ test.describe('Weather Dashboard - Search Functionality', () => {
 
     test('should show loading state before data appears', async ({ page }) => {
         weatherPage = new WeatherPage(page);
+        await weatherPage.mockRuntimeConfig();
 
         // Mock con delay para ver el skeleton
         await page.route('**/data/2.5/weather**', async (route) => {
@@ -54,7 +56,7 @@ test.describe('Weather Dashboard - Search Functionality', () => {
 
         await weatherPage.goto('/');
         await weatherPage.searchInput.fill('London');
-        await weatherPage.searchInput.press('Enter');
+        await weatherPage.searchButton.click();
 
         // Assert - Skeleton loader aparece (señal de UX profesional)
         const loadingContainer = page.getByTestId('loading-state');

@@ -1,4 +1,4 @@
-# ADR-001: Data Fetching Strategy
+# ADR-003: Data Fetching Strategy
 
 ## English
 
@@ -20,7 +20,7 @@ The current implementation uses:
 
 ### Consequences
 
-Pros:
+Benefits:
 
 - compatible with zoneless change detection
 - keeps components focused on reading reactive state
@@ -51,7 +51,7 @@ La implementación actual usa:
 
 ### Consecuencias
 
-Pros:
+Beneficios:
 
 - compatible con detección de cambios zoneless
 - mantiene los componentes centrados en leer estado reactivo

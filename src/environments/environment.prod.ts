@@ -1,23 +1,13 @@
+import { Environment } from './environment.model';
+
 /**
  * Environment configuration for PRODUCTION builds.
- * 
- * Este archivo se usa cuando ejecutas: ng build --configuration production
- * El placeholder __OPENWEATHER_API_KEY__ será reemplazado por GitHub Actions
- * con el valor real desde GitHub Secrets durante el CI/CD pipeline.
+ *
+ * Este archivo solo define banderas de build del frontend.
+ * Las credenciales de proveedores externos deben permanecer fuera del cliente
+ * y resolverse en el backend proxy o gateway.
  */
 
-export interface Environment {
-    production: boolean;
-    openWeather: {
-        baseUrl: string;
-        apiKey: string;
-    };
-}
-
 export const environment: Environment = {
-    production: true,
-    openWeather: {
-        baseUrl: 'https://api.openweathermap.org/data/2.5',
-        apiKey: '__OPENWEATHER_API_KEY__'  // ← Placeholder para GitHub Actions
-    }
+    production: true
 };

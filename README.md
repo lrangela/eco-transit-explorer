@@ -2,25 +2,76 @@
 
 ![CI](https://github.com/lrangela/eco-transit-explorer/actions/workflows/ci-cd.yml/badge.svg)
 
+- Live URL / URL de despliegue: [https://lrangela.github.io/eco-transit-explorer/](https://lrangela.github.io/eco-transit-explorer/)
+
 ## English
 
-EcoTransit Explorer is an Angular 21 portfolio application that combines weather data and urban mobility context in a standalone architecture built with Signals, zoneless change detection, PrimeNG, and Playwright.
+### Real Problem
 
-### Live Demo
+Urban users need a lightweight way to check current weather conditions and bike-sharing availability before leaving home. The constraint is deliberate: this project must work with free-tier public APIs, frontend-only hosting, and no custom backend.
 
-- URL: [https://lrangela.github.io/eco-transit-explorer/](https://lrangela.github.io/eco-transit-explorer/)
+### Solution
+
+EcoTransit Explorer is a frontend-only Angular 21 application that:
+
+- shows current weather and 5-day forecast from OpenWeather
+- compares up to 3 cities to stay inside free-tier request limits
+- shows BiciMAD bike-sharing station availability from CityBikes
+- loads runtime configuration at startup so deployment-specific values do not require rebuilding the source
+
+### Architecture
+
+```mermaid
+flowchart LR
+  User["User Browser"]
+  App["Angular 21 SPA<br/>Signals + Zoneless + Standalone"]
+  Config["public/runtime-config.json<br/>deployment template"]
+  Local["environment.local.ts<br/>local-only override"]
+  Weather["OpenWeather API"]
+  Bikes["CityBikes API"]
+  CI["GitHub Actions"]
+  Pages["GitHub Pages"]
+
+  User --> App
+  Config --> App
+  Local --> App
+  App --> Weather
+  App --> Bikes
+  CI --> Config
+  CI --> Pages
+```
 
 ### Stack
 
 - Angular 21
+- TypeScript 5.9
 - Standalone components
 - Signals, `resource`, and `rxResource`
 - Zoneless change detection
-- PrimeNG and PrimeFlex
-- Playwright for E2E tests
-- GitHub Actions and GitHub Pages
+- PrimeNG + PrimeIcons
+- Vitest for unit tests
+- Playwright + AXE for E2E and accessibility smoke tests
+- GitHub Actions + GitHub Pages
 
-### Quick Start
+### Technical Decisions
+
+- Frontend-only integration: weather and bike data are consumed directly from the browser because the deployment target is static hosting.
+- Runtime configuration: `public/runtime-config.json` is injected at deploy time, while `src/environments/environment.local.ts` is reserved for local-only overrides.
+- Free-tier guardrails: city comparison is capped at 3 cities to avoid abusing free API quotas.
+- Honest transit scope: the transit feature is explicitly bike-sharing availability, not bus or metro ETA.
+- Bundle reduction: route-level lazy loading plus `@defer` is used for non-critical widgets such as forecast and comparison results.
+- No tracked secrets: real API keys must never be committed.
+
+### Highlighted Features
+
+- Current weather search with reactive input and retry-safe error handling
+- 5-day forecast loaded progressively
+- Multi-city comparison with free-tier-safe limits
+- BiciMAD station availability with explicit empty/error separation
+- Runtime feature flags for optional sections
+- Accessibility smoke coverage with AXE
+
+### How to Run
 
 1. Install dependencies:
 
@@ -28,14 +79,13 @@ EcoTransit Explorer is an Angular 21 portfolio application that combines weather
    npm install
    ```
 
-2. Create a local environment file:
+2. Create the local override file:
 
    ```bash
-   cd src\environments
-   copy environment.local.example.ts environment.local.ts
+   copy src\environments\environment.local.example.ts src\environments\environment.local.ts
    ```
 
-3. Edit `environment.local.ts` and replace `YOUR_API_KEY_HERE` with a valid OpenWeatherMap API key.
+3. Add your OpenWeather API key to `src/environments/environment.local.ts`.
 
 4. Start the app:
 
@@ -45,149 +95,159 @@ EcoTransit Explorer is an Angular 21 portfolio application that combines weather
 
 5. Open `http://localhost:4200/`.
 
-`environment.local.ts` is ignored by Git and must never be committed.
+### How to Deploy
 
-### Available Scripts
+Production deploy is handled by GitHub Actions.
 
-- `npm start`: run the default Angular serve configuration
-- `npm run start:local`: run with `environment.local.ts`
-- `npm run start:dev`: run with `environment.development.ts`
-- `npm run start:prod`: run with the production serve target
-- `npm run build`: production build
-- `npm run build:local`: local build
-- `npm run build:dev`: development build
-- `npm run build:prod`: production build
-- `npm run test`: unit tests
-- `npm run e2e`: Playwright E2E suite
-- `npm run e2e:ui`: Playwright UI mode
-- `npm run e2e:headed`: headed Playwright run
+1. Configure the repository secret:
+
+   - `OPENWEATHER_API_KEY`
+
+2. Optional repository variables:
+
+   - `OPENWEATHER_BASE_URL`
+   - `OPENWEATHER_UNITS`
+   - `OPENWEATHER_LANGUAGE`
+
+3. Push to `main`.
+
+The workflow:
+
+- runs `npm ci --legacy-peer-deps`
+- validates runtime config
+- runs unit, smoke, and E2E tests
+- injects `runtime-config.json`
+- builds the Angular app
+- deploys to GitHub Pages
 
 ### Documentation
 
-- [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)
-- [docs/API_INTEGRATION.md](docs/API_INTEGRATION.md)
-- [docs/SCRIPTS_CONFIG.md](docs/SCRIPTS_CONFIG.md)
-- [docs/ADR-001-DATA-FETCHING.md](docs/ADR-001-DATA-FETCHING.md)
-- [docs/adr/ADR-001-zoneless-architecture.md](docs/adr/ADR-001-zoneless-architecture.md)
-
-### CI/CD
-
-The repository includes a GitHub Actions workflow at [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) that:
-
-1. Installs dependencies
-2. Runs unit tests
-3. Runs Playwright E2E tests
-4. Injects `OPENWEATHER_API_KEY` into production placeholders during CI
-5. Builds the Angular app for GitHub Pages
-6. Deploys the generated site
-
-Required repository secret:
-
-- `OPENWEATHER_API_KEY`
-
-GitHub setup path:
-
-- `Settings > Secrets and variables > Actions > New repository secret`
-- `Settings > Pages > Source > GitHub Actions`
-
-### Security Notes
-
-- No real API keys should exist in tracked files.
-- `environment.local.ts` is intended for local-only development.
-- This is a frontend application, so any production API key injected at build time is still shipped to the browser bundle.
-- For production-grade secret protection, a backend proxy is required.
+- [API integration](docs/API_INTEGRATION.md)
+- [Local setup](docs/LOCAL_SETUP.md)
+- [Zoneless architecture ADR](docs/adr/ADR-001-zoneless-architecture.md)
+- [Documentation governance ADR](docs/adr/ADR-002-documentation-governance.md)
+- [Data fetching ADR](docs/adr/ADR-003-data-fetching-strategy.md)
 
 ## Español
 
-EcoTransit Explorer es una aplicación portfolio en Angular 21 que combina datos meteorológicos y contexto de movilidad urbana en una arquitectura standalone construida con Signals, detección de cambios zoneless, PrimeNG y Playwright.
+### Problema real
 
-### Demo en Vivo
+Los usuarios urbanos necesitan una forma ligera de revisar el clima actual y la disponibilidad de bicicletas compartidas antes de salir. La restricción es intencional: este proyecto debe funcionar con APIs públicas en plan gratuito, hosting estático y sin backend propio.
 
-- URL: [https://lrangela.github.io/eco-transit-explorer/](https://lrangela.github.io/eco-transit-explorer/)
+### Solución
+
+EcoTransit Explorer es una aplicación Angular 21 frontend-only que:
+
+- muestra clima actual y pronóstico de 5 días desde OpenWeather
+- compara hasta 3 ciudades para mantenerse dentro de los límites del plan gratuito
+- muestra disponibilidad de estaciones BiciMAD desde CityBikes
+- carga configuración runtime al iniciar para no recompilar el código por cada despliegue
+
+### Arquitectura
+
+```mermaid
+flowchart LR
+  User["Navegador del usuario"]
+  App["SPA Angular 21<br/>Signals + Zoneless + Standalone"]
+  Config["public/runtime-config.json<br/>plantilla de despliegue"]
+  Local["environment.local.ts<br/>override local"]
+  Weather["API de OpenWeather"]
+  Bikes["API de CityBikes"]
+  CI["GitHub Actions"]
+  Pages["GitHub Pages"]
+
+  User --> App
+  Config --> App
+  Local --> App
+  App --> Weather
+  App --> Bikes
+  CI --> Config
+  CI --> Pages
+```
 
 ### Stack
 
 - Angular 21
+- TypeScript 5.9
 - Componentes standalone
 - Signals, `resource` y `rxResource`
 - Detección de cambios zoneless
-- PrimeNG y PrimeFlex
-- Playwright para pruebas E2E
-- GitHub Actions y GitHub Pages
+- PrimeNG + PrimeIcons
+- Vitest para pruebas unitarias
+- Playwright + AXE para E2E y smoke de accesibilidad
+- GitHub Actions + GitHub Pages
 
-### Inicio Rápido
+### Decisiones técnicas
 
-1. Instalar dependencias:
+- Integración frontend-only: clima y bicicletas se consumen directamente desde el navegador porque el destino de despliegue es hosting estático.
+- Configuración runtime: `public/runtime-config.json` se inyecta en despliegue y `src/environments/environment.local.ts` queda reservado para overrides locales.
+- Límites del plan gratuito: comparison está limitado a 3 ciudades para no abusar de la cuota.
+- Alcance honesto de transit: el módulo es disponibilidad de bike-sharing, no ETA de bus o metro.
+- Reducción de bundle: se usa lazy loading por rutas y `@defer` en widgets no críticos como forecast y resultados de comparison.
+- Sin secretos versionados: nunca debe existir una API key real en el repositorio.
+
+### Features destacadas
+
+- Búsqueda de clima actual con input reactivo y manejo de errores con reintento
+- Pronóstico de 5 días cargado de forma progresiva
+- Comparación multi-ciudad con límites seguros para el plan gratuito
+- Disponibilidad de estaciones BiciMAD con separación explícita entre vacío y error
+- Feature flags runtime para secciones opcionales
+- Cobertura smoke de accesibilidad con AXE
+
+### Cómo correr
+
+1. Instala dependencias:
 
    ```bash
    npm install
    ```
 
-2. Crear el archivo de entorno local:
+2. Crea el archivo local:
 
    ```bash
-   cd src\environments
-   copy environment.local.example.ts environment.local.ts
+   copy src\environments\environment.local.example.ts src\environments\environment.local.ts
    ```
 
-3. Editar `environment.local.ts` y reemplazar `YOUR_API_KEY_HERE` con una API key válida de OpenWeatherMap.
+3. Agrega tu API key de OpenWeather en `src/environments/environment.local.ts`.
 
-4. Iniciar la aplicación:
+4. Inicia la app:
 
    ```bash
    npm run start:local
    ```
 
-5. Abrir `http://localhost:4200/`.
+5. Abre `http://localhost:4200/`.
 
-`environment.local.ts` está ignorado por Git y no debe versionarse.
+### Cómo desplegar
 
-### Scripts Disponibles
+El despliegue de producción se resuelve con GitHub Actions.
 
-- `npm start`: ejecuta la configuración por defecto de Angular
-- `npm run start:local`: ejecuta con `environment.local.ts`
-- `npm run start:dev`: ejecuta con `environment.development.ts`
-- `npm run start:prod`: ejecuta el target de producción
-- `npm run build`: build de producción
-- `npm run build:local`: build local
-- `npm run build:dev`: build de desarrollo
-- `npm run build:prod`: build de producción
-- `npm run test`: pruebas unitarias
-- `npm run e2e`: suite E2E con Playwright
-- `npm run e2e:ui`: modo UI de Playwright
-- `npm run e2e:headed`: ejecución visible de Playwright
+1. Configura el secreto del repositorio:
+
+   - `OPENWEATHER_API_KEY`
+
+2. Variables opcionales:
+
+   - `OPENWEATHER_BASE_URL`
+   - `OPENWEATHER_UNITS`
+   - `OPENWEATHER_LANGUAGE`
+
+3. Haz push a `main`.
+
+El workflow:
+
+- ejecuta `npm ci --legacy-peer-deps`
+- valida la configuración runtime
+- corre pruebas unitarias, smoke y E2E
+- inyecta `runtime-config.json`
+- compila la aplicación Angular
+- despliega en GitHub Pages
 
 ### Documentación
 
-- [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)
-- [docs/API_INTEGRATION.md](docs/API_INTEGRATION.md)
-- [docs/SCRIPTS_CONFIG.md](docs/SCRIPTS_CONFIG.md)
-- [docs/ADR-001-DATA-FETCHING.md](docs/ADR-001-DATA-FETCHING.md)
-- [docs/adr/ADR-001-zoneless-architecture.md](docs/adr/ADR-001-zoneless-architecture.md)
-
-### CI/CD
-
-El repositorio incluye un workflow de GitHub Actions en [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) que:
-
-1. Instala dependencias
-2. Ejecuta pruebas unitarias
-3. Ejecuta pruebas E2E con Playwright
-4. Inyecta `OPENWEATHER_API_KEY` en los placeholders de producción durante CI
-5. Compila la aplicación Angular para GitHub Pages
-6. Publica el sitio generado
-
-Secret requerido del repositorio:
-
-- `OPENWEATHER_API_KEY`
-
-Ruta de configuración en GitHub:
-
-- `Settings > Secrets and variables > Actions > New repository secret`
-- `Settings > Pages > Source > GitHub Actions`
-
-### Notas de Seguridad
-
-- No deben existir API keys reales en archivos versionados.
-- `environment.local.ts` está pensado solo para desarrollo local.
-- Esta es una aplicación frontend, por lo que cualquier API key de producción inyectada en build termina dentro del bundle del navegador.
-- Para proteger secretos de forma real en producción, hace falta un backend proxy.
+- [Integración API](docs/API_INTEGRATION.md)
+- [Setup local](docs/LOCAL_SETUP.md)
+- [ADR de arquitectura zoneless](docs/adr/ADR-001-zoneless-architecture.md)
+- [ADR de gobierno documental](docs/adr/ADR-002-documentation-governance.md)
+- [ADR de estrategia de data fetching](docs/adr/ADR-003-data-fetching-strategy.md)

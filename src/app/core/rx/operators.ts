@@ -1,5 +1,6 @@
 import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { AppLoggerService } from '../logging/app-logger.service';
 import { NetworkError, RateLimitedError, UnknownError } from '../error/domain-errors';
 
 /**
@@ -33,16 +34,14 @@ export function safeRetry<T>(maxRetries: number = 2) {
  * Catches errors and ensures they are wrapped in Domain classes.
  * logs parameters for debugging.
  */
-export function handleDomainError<T>(debugContext: string) {
+export function handleDomainError<T>(debugContext: string, logger: AppLoggerService) {
     return (source: Observable<T>): Observable<T> => {
         return source.pipe(
             catchError(err => {
-                console.error(`[${debugContext}] Stream Error:`, err);
-                // If it's already a domain error, rethrow it
+                logger.error(`[${debugContext}] Stream Error`, err);
                 if (err instanceof NetworkError || err instanceof RateLimitedError || err instanceof UnknownError) {
                     return throwError(() => err);
                 }
-                // Otherwise, wrap it
                 return throwError(() => new UnknownError('An unexpected error occurred', err));
             })
         );

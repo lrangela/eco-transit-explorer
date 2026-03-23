@@ -1,15 +1,32 @@
-export type TransitType = 'METRO' | 'BUS' | 'BIKE';
-export type TransitStatus = 'ON_TIME' | 'DELAYED' | 'CLOSED';
+export type MobilityMode = 'BIKE';
+export type BikeAvailabilityStatus = 'AVAILABLE' | 'LIMITED' | 'EMPTY' | 'OFFLINE';
+export type BikeAvailabilityAlertLevel = 'NORMAL' | 'WARNING' | 'SEVERE';
 
-export interface TransitLine {
-    id: string;
-    name: string;
-    type: TransitType;
-    status: TransitStatus;
-    nextArrival: number; // minutes
-    destination: string;
-    // Open Data Extras
-    agencyId?: string; // e.g., 'DGT-MAD-01'
-    alertLevel?: 'NORMAL' | 'WARNING' | 'SEVERE';
-    dataSource?: string;
+export interface BikeAvailabilityStation {
+  id: string;
+  stationName: string;
+  mode: MobilityMode;
+  status: BikeAvailabilityStatus;
+  availableBikes: number;
+  availableDocks: number;
+  city: string;
+  operatorId: string;
+  operatorLabel: string;
+  alertLevel: BikeAvailabilityAlertLevel;
+}
+
+export interface CityBikeNetworkDto {
+  network?: {
+    location?: {
+      city?: string;
+    };
+    stations?: CityBikeStationDto[];
+  };
+}
+
+export interface CityBikeStationDto {
+  id: string;
+  name: string;
+  free_bikes?: number;
+  empty_slots?: number;
 }

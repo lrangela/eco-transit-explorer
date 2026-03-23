@@ -2,146 +2,118 @@
 
 ## English
 
-### Prerequisites
+### Real Problem
 
-- Node.js compatible with the repository toolchain
+Developers need to run the project locally without committing secrets and without depending on a backend service that does not exist in production.
+
+### Solution
+
+Local execution uses `src/environments/environment.local.ts` as a Git-ignored override while the tracked runtime config stays safe and secret-free.
+
+### Stack
+
+- Node.js 20+
 - npm
-- An OpenWeatherMap API key
+- Angular CLI
+- OpenWeather API key for local weather calls
 
-### Local Environment File
+### Technical Decisions
 
-Create the local file from the example:
+- `environment.local.ts` is the only place where a local real key is expected
+- `runtime-config.json` remains a deployment template
+- `start:local` uses Angular file replacement
+- `start:dev` is reserved for versioned config and CI-like runs
 
-```bash
-cd src\environments
-copy environment.local.example.ts environment.local.ts
-```
+### How to Run
 
-Open `environment.local.ts` and replace `YOUR_API_KEY_HERE` with a valid API key.
+1. Install dependencies:
 
-Important:
+   ```bash
+   npm install
+   ```
 
-- `environment.local.ts` is ignored by Git
-- it must not be committed
-- CI does not use this file
+2. Create the local override:
 
-### Start Commands
+   ```bash
+   copy src\environments\environment.local.example.ts src\environments\environment.local.ts
+   ```
 
-- `npm run start:local`
-  - uses `environment.local.ts`
-  - recommended for local development with a personal API key
+3. Add your OpenWeather API key.
 
-- `npm run start:dev`
-  - uses `environment.development.ts`
-  - intended for committed development configuration and CI-oriented scenarios
-
-- `npm start`
-  - uses the default serve target
-  - not recommended when the local API key is only present in `environment.local.ts`
-
-### Verification
-
-1. Run:
+4. Start the app:
 
    ```bash
    npm run start:local
    ```
 
-2. Open `http://localhost:4200/`
-3. Search for a city such as `Madrid` or `London`
-4. Confirm that current weather and forecast data render correctly
+5. Open `http://localhost:4200/`.
 
 ### Troubleshooting
 
-#### `environment.local.ts` not found
+- `401` or `403`
+  - verify the API key
+  - verify the selected `weatherBaseUrl`
+  - if required for your region, use `https://cn-api.openweathermap.org/data/2.5`
 
-Create it again from the example:
-
-```bash
-copy src\environments\environment.local.example.ts src\environments\environment.local.ts
-```
-
-#### Invalid API key or `401`
-
-- verify the copied key
-- wait a few minutes after creating a new OpenWeatherMap account
-- confirm that `npm run start:local` is being used instead of `npm start`
-
-#### App loads but weather data does not appear
-
-- verify the key in `environment.local.ts`
-- verify network requests in the browser devtools
-- confirm that the searched city exists
+- app loads but no weather data
+  - inspect browser network requests
+  - verify the searched city exists
 
 ## Español
 
-### Prerrequisitos
+### Problema real
 
-- Node.js compatible con el toolchain del repositorio
+Los desarrolladores necesitan correr el proyecto localmente sin versionar secretos y sin depender de un backend que no existe en producción.
+
+### Solución
+
+La ejecución local usa `src/environments/environment.local.ts` como override ignorado por Git, mientras que la configuración runtime versionada se mantiene segura y sin secretos.
+
+### Stack
+
+- Node.js 20+
 - npm
-- Una API key de OpenWeatherMap
+- Angular CLI
+- API key de OpenWeather para llamadas locales de clima
 
-### Archivo de Entorno Local
+### Decisiones técnicas
 
-Crear el archivo local a partir del ejemplo:
+- `environment.local.ts` es el único lugar donde se espera una key real local
+- `runtime-config.json` se mantiene como plantilla de despliegue
+- `start:local` usa file replacement de Angular
+- `start:dev` queda para configuración versionada y ejecuciones tipo CI
 
-```bash
-cd src\environments
-copy environment.local.example.ts environment.local.ts
-```
+### Cómo correr
 
-Abrir `environment.local.ts` y reemplazar `YOUR_API_KEY_HERE` por una API key válida.
+1. Instala dependencias:
 
-Importante:
+   ```bash
+   npm install
+   ```
 
-- `environment.local.ts` está ignorado por Git
-- no debe versionarse
-- CI no usa este archivo
+2. Crea el override local:
 
-### Comandos de Inicio
+   ```bash
+   copy src\environments\environment.local.example.ts src\environments\environment.local.ts
+   ```
 
-- `npm run start:local`
-  - usa `environment.local.ts`
-  - recomendado para desarrollo local con API key personal
+3. Agrega tu API key de OpenWeather.
 
-- `npm run start:dev`
-  - usa `environment.development.ts`
-  - pensado para configuración de desarrollo versionada y escenarios orientados a CI
-
-- `npm start`
-  - usa el target por defecto de Angular
-  - no es recomendable si la API key local solo existe en `environment.local.ts`
-
-### Verificación
-
-1. Ejecutar:
+4. Inicia la app:
 
    ```bash
    npm run start:local
    ```
 
-2. Abrir `http://localhost:4200/`
-3. Buscar una ciudad como `Madrid` o `London`
-4. Confirmar que se renderizan el clima actual y el pronóstico
+5. Abre `http://localhost:4200/`.
 
-### Solución de Problemas
+### Solución de problemas
 
-#### No existe `environment.local.ts`
+- `401` o `403`
+  - verifica la API key
+  - verifica el `weatherBaseUrl`
+  - si tu región lo requiere, usa `https://cn-api.openweathermap.org/data/2.5`
 
-Crearlo nuevamente desde el ejemplo:
-
-```bash
-copy src\environments\environment.local.example.ts src\environments\environment.local.ts
-```
-
-#### API key inválida o error `401`
-
-- verificar la clave copiada
-- esperar unos minutos tras crear una cuenta nueva en OpenWeatherMap
-- confirmar que se está usando `npm run start:local` y no `npm start`
-
-#### La app carga pero no aparecen datos del clima
-
-- verificar la clave en `environment.local.ts`
-- revisar las peticiones de red en devtools
-- confirmar que la ciudad buscada existe
+- la app carga pero no aparecen datos
+  - revisa las peticiones en el navegador
+  - confirma que la ciudad buscada existe

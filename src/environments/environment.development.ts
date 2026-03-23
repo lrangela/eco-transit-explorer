@@ -1,17 +1,12 @@
-import { Environment } from './environment';
+import { Environment } from './environment.model';
 
 /**
- * TEMPLATE para environment de desarrollo local.
- * 
- * INSTRUCCIONES:
- * 1. Copia este archivo a: environment.local.ts
- * 2. En environment.local.ts, reemplaza 'YOUR_API_KEY_HERE' con tu API key real
- * 3. environment.local.ts está en .gitignore y NO se subirá a GitHub
+ * Environment de desarrollo versionado.
+ *
+ * Los secretos del proveedor climático no pertenecen al frontend.
+ * Las URLs base y feature flags se cargan desde `public/runtime-config.json`.
+ * `environment.local.ts` solo debe usarse para overrides locales de Angular.
  */
 export const environment: Environment = {
-    production: false,
-    openWeather: {
-        baseUrl: 'https://api.openweathermap.org/data/2.5',
-        apiKey: 'YOUR_API_KEY_HERE'  // ← Reemplaza esto con tu API key
-    }
+    production: false
 };

@@ -1,0 +1,16 @@
+{
+  "api": {
+    "weatherBaseUrl": "https://api.openweathermap.org/data/2.5",
+    "weatherApiKey": "__OPENWEATHER_API_KEY__",
+    "weatherUnits": "metric",
+    "weatherLanguage": "en",
+    "transitBaseUrl": "https://api.citybik.es/v2"
+  },
+  "features": {
+    "comparison": true,
+    "transit": true
+  },
+  "observability": {
+    "consoleLogging": false
+  }
+}

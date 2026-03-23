@@ -6,14 +6,17 @@ test.describe('Weather Dashboard - Error Handling', () => {
 
     test.beforeEach(async ({ page }) => {
         weatherPage = new WeatherPage(page);
+        await weatherPage.mockRuntimeConfig();
         await weatherPage.goto('/');
     });
 
     test('should display error message for non-existent city', async ({ page }) => {
         weatherPage = new WeatherPage(page);
+        await weatherPage.mockRuntimeConfig();
 
         // Mockear error 404 de API
         await weatherPage.mockWeatherAPIError(404);
+        await weatherPage.mockForecastAPI({ city: { name: 'Fallback', timezone: 0 }, list: [] });
         await weatherPage.goto('/');
 
         // Act

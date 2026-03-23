@@ -18,3 +18,8 @@ export interface ForecastDay {
 }
 
 export type ForecastList = ForecastDay[];
+
+export interface WeatherComparisonResult {
+    items: WeatherModel[];
+    failedCities: string[];
+}
